@@ -45,11 +45,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) {
             gh release create $tag --title "研习岛 Windows 客户端 $tag" --generate-notes
           }
-          $files = Get-ChildItem -Path "release" -Filter "*.exe" | ForEach-Object { $_.FullName }
-          if (-not $files) {
+          $files = @(Get-ChildItem -Path "release" -Filter "*.exe")
+          if ($files.Count -eq 0) {
             throw "No .exe installer found in release/"
           }
-          gh release upload $tag @files --clobber
+          foreach ($file in $files) {
+            gh release upload $tag $file.FullName --clobber
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
       - uses: actions/upload-artifact@v4
         with:
           name: windows-installer
