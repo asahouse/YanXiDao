@@ -16,8 +16,12 @@ jobs:
         with:
           node-version: '22'
       - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
       - run: npm run typecheck
+      - run: npm run test:unit
       - run: npm run build
+      - run: npx playwright install chromium --with-deps
+      - run: npm run test:e2e:web
       - uses: actions/upload-artifact@v4
         with:
           name: web-dist
@@ -35,7 +39,9 @@ jobs:
         with:
           node-version: '22'
       - run: npm ci
-      - run: npm run electron:build -- --publish never
+      - run: npm run build
+      - run: npm run test:e2e:electron
+      - run: npx electron-builder --config electron-builder.json --win --publish never
       - name: Upload installer to GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
