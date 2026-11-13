@@ -35,9 +35,21 @@ jobs:
         with:
           node-version: '22'
       - run: npm ci
-      - run: npm run electron:build
+      - run: npm run electron:build -- --publish never
+      - name: Upload installer to GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --title "研习岛 Windows 客户端 $tag" --generate-notes
+          }
+          $files = Get-ChildItem -Path "release" -Filter "*.exe" | ForEach-Object { $_.FullName }
+          if (-not $files) {
+            throw "No .exe installer found in release/"
+          }
+          gh release upload $tag @files --clobber
       - uses: actions/upload-artifact@v4
         with:
           name: windows-installer
