@@ -21,7 +21,7 @@
   "dependencies": {
     "@lucide/vue": "^1.47.0",
     "@tailwindcss/vite": "^4.3.3",
-    "@yanxidao/shared": "git+file:///c:/Users/Benjamin/Documents/agy-space/YanXiDao/yanxidao-shared#v1.0.0",
+    "@yanxidao/shared": "git+https://github.com/asahouse/YanXiDao-Shared.git#v1.0.0",
     "canvas-confetti": "^1.9.4",
     "cors": "^2.8.6",
     "dotenv": "^18.0.2",
