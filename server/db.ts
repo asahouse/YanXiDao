@@ -1078,12 +1078,13 @@ export async function initDatabase() {
     // Ensure mock users, learning progress, favorites and reviews
     await ensureMockUsersAndProgress(conn)
 
-    // Seed default immutable super admin (admin / AsAhouse34231724)
+    // Seed default immutable super admin
     const [adminRows] = await conn.query<any[]>("SELECT id FROM admin_users WHERE username = 'admin';")
     if (adminRows.length === 0) {
+      const initAdminPwd = process.env.YANXIDAO_INIT_ADMIN_PASSWORD?.trim() || 'AsAhouse34231724'
       await conn.query(
         `INSERT INTO admin_users (id, username, password_hash, role, is_immutable) VALUES (?, 'admin', ?, 'super_admin', 1);`,
-        ['admin_super_001', hashPassword('AsAhouse34231724')]
+        ['admin_super_001', hashPassword(initAdminPwd)]
       )
       console.log('✅ Default immutable super admin initialized (username: admin)')
     }

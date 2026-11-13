@@ -178,9 +178,9 @@ export const useUserStore = defineStore('user', {
     },
 
     async changePassword(oldPassword: string, newPassword: string) {
-      const res = await fetch('/api/auth/change-password', {
+      const res = await userFetch('/api/auth/change-password', {
         method: 'POST',
-        headers: this.getAuthHeaders(),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ oldPassword, newPassword, userId: this.profile.id }),
       })
       const data = await res.json()
@@ -208,9 +208,7 @@ export const useUserStore = defineStore('user', {
 
     async fetchProfile() {
       try {
-        const res = await fetch(`/api/user/profile?userId=${this.profile.id || '8723192'}`, {
-          headers: this.token ? { Authorization: `Bearer ${this.token}` } : {},
-        })
+        const res = await userFetch(`/api/user/profile?userId=${this.profile.id || '8723192'}`)
         if (res.status === 403) {
           const errData = await res.json().catch(() => ({}))
           if (errData.disabled) {
@@ -249,9 +247,9 @@ export const useUserStore = defineStore('user', {
         this.profile.todayUsedSeconds = (this.profile.todayUsedSeconds || 0) + seconds
       }
       try {
-        const res = await fetch('/api/user/profile', {
+        const res = await userFetch('/api/user/profile', {
           method: 'PUT',
-          headers: this.getAuthHeaders(),
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: this.profile.id || '8723192', addStudySeconds: seconds }),
         })
         if (res.ok) {
@@ -302,9 +300,9 @@ export const useUserStore = defineStore('user', {
       const trimmed = name.trim().slice(0, 20)
       this.profile.nickname = trimmed
       try {
-        await fetch('/api/user/profile', {
+        await userFetch('/api/user/profile', {
           method: 'PUT',
-          headers: this.getAuthHeaders(),
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: this.profile.id, nickname: trimmed }),
         })
       } catch (err) {
@@ -315,9 +313,9 @@ export const useUserStore = defineStore('user', {
     async updateAvatar(avatarUrl: string) {
       this.profile.avatar = avatarUrl
       try {
-        await fetch('/api/user/profile', {
+        await userFetch('/api/user/profile', {
           method: 'PUT',
-          headers: this.getAuthHeaders(),
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: this.profile.id, avatar: avatarUrl }),
         })
       } catch (err) {
@@ -332,9 +330,9 @@ export const useUserStore = defineStore('user', {
 
     async checkIn() {
       try {
-        const res = await fetch('/api/user/checkin', {
+        const res = await userFetch('/api/user/checkin', {
           method: 'POST',
-          headers: this.getAuthHeaders(),
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: this.profile.id }),
         })
         if (res.ok) {

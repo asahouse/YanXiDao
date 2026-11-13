@@ -41,6 +41,20 @@ export async function saveSmtpConfig(cfg: Partial<SmtpConfig>): Promise<SmtpConf
   return next
 }
 
+function escapeHtml(raw: string): string {
+  return String(raw || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function maskResetLink(link?: string): string {
+  if (!link) return ''
+  return link.replace(/([?&]token=)[^&]+/gi, '$1***')
+}
+
 interface SendEmailOptions {
   to: string
   subject: string
@@ -82,7 +96,7 @@ export async function sendSystemEmail(opts: SendEmailOptions): Promise<{ status:
     }
   } else {
     status = 'simulated'
-    console.log(`[EmailService] (Simulated Outbox) To: ${opts.to} | Subject: ${opts.subject} | TempPwd: ${opts.tempPassword || '-'} | Link: ${opts.resetLink || '-'}`)
+    console.log(`[EmailService] (Simulated Outbox) To: ${opts.to} | Subject: ${opts.subject}`)
   }
 
   try {
@@ -94,8 +108,8 @@ export async function sendSystemEmail(opts: SendEmailOptions): Promise<{ status:
         opts.to,
         opts.subject,
         opts.textPreview,
-        opts.tempPassword || '',
-        opts.resetLink || '',
+        opts.tempPassword ? '********' : '',
+        maskResetLink(opts.resetLink),
         status,
         errorMsg,
       ]
@@ -110,7 +124,7 @@ export async function sendSystemEmail(opts: SendEmailOptions): Promise<{ status:
 export async function sendAccountProvisionEmail(params: {
   email: string
   nickname: string
-  tempPassword: string
+  tempPassword?: string
   resetLink: string
   vipType: VipType
   vipExpireAt?: string | null
@@ -125,34 +139,40 @@ export async function sendAccountProvisionEmail(params: {
       : `有效期至 ${params.vipExpireAt || '-'}`
 
   const subject = params.isReset
-    ? '【研习岛】您的登录密码已重置，请查收临时密码'
+    ? '【研习岛】您的登录密码重置链接，请查收'
     : '【研习岛】欢迎加入研习岛！您的账号与会员权益已开通'
 
   const heading = params.isReset ? '账号密码重置通知' : '欢迎加入研习岛（YanXiDao）'
+  const safeNickname = escapeHtml(params.nickname)
+  const safeEmail = escapeHtml(params.email)
+  const safeTempPwd = params.tempPassword ? escapeHtml(params.tempPassword) : ''
+  const safeResetLink = escapeHtml(params.resetLink)
+  const safeVipLabel = escapeHtml(vipLabel)
+  const safeExpireDesc = escapeHtml(expireDesc)
 
   const html = `
     <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 28px; background: #0f172a; color: #f8fafc; border-radius: 16px; border: 1px solid #1e293b;">
       <h2 style="margin: 0 0 12px; color: #818cf8;">${heading}</h2>
-      <p style="color: #cbd5e1; line-height: 1.6;">您好，<strong>${params.nickname}</strong>：</p>
+      <p style="color: #cbd5e1; line-height: 1.6;">您好，<strong>${safeNickname}</strong>：</p>
       <p style="color: #cbd5e1; line-height: 1.6;">
-        ${params.isReset ? '管理员已为您重置登录密码。' : '您的研习岛学习账号已由管理员开通激活。'}
+        ${params.isReset ? '您正在申请重置研习岛账号密码。如非本人操作，请忽略此邮件（原密码不受影响）。' : '您的研习岛学习账号已由管理员开通激活。'}
       </p>
       <div style="background: #1e293b; padding: 16px; border-radius: 12px; margin: 18px 0; border: 1px solid #334155;">
-        <p style="margin: 6px 0; font-size: 14px;">登录邮箱：<strong style="color: #fff;">${params.email}</strong></p>
-        <p style="margin: 6px 0; font-size: 14px;">8位临时密码：<strong style="color: #38bdf8; font-size: 18px; letter-spacing: 1px;">${params.tempPassword}</strong></p>
-        <p style="margin: 6px 0; font-size: 14px;">会员类型：<strong style="color: #fbbf24;">${vipLabel}</strong>（${expireDesc}）</p>
+        <p style="margin: 6px 0; font-size: 14px;">登录邮箱：<strong style="color: #fff;">${safeEmail}</strong></p>
+        ${safeTempPwd ? `<p style="margin: 6px 0; font-size: 14px;">8位临时密码：<strong style="color: #38bdf8; font-size: 18px; letter-spacing: 1px;">${safeTempPwd}</strong></p>` : ''}
+        <p style="margin: 6px 0; font-size: 14px;">会员类型：<strong style="color: #fbbf24;">${safeVipLabel}</strong>（${safeExpireDesc}）</p>
       </div>
-      <p style="color: #cbd5e1; line-height: 1.6;">为了您的账号安全，请点击下方按钮直接设置新密码（24小时内有效），也可使用上方临时密码登录后修改：</p>
+      <p style="color: #cbd5e1; line-height: 1.6;">为了您的账号安全，请点击下方按钮直接设置新密码（24小时内有效）${safeTempPwd ? '，也可使用上方临时密码登录后修改' : ''}：</p>
       <div style="text-align: center; margin: 24px 0;">
-        <a href="${params.resetLink}" style="display: inline-block; padding: 12px 28px; background: #4f46e5; color: #ffffff; text-decoration: none; font-weight: bold; border-radius: 10px;">
+        <a href="${safeResetLink}" style="display: inline-block; padding: 12px 28px; background: #4f46e5; color: #ffffff; text-decoration: none; font-weight: bold; border-radius: 10px;">
           立即修改密码并登录
         </a>
       </div>
-      <p style="font-size: 12px; color: #64748b; word-break: break-all;">若按钮无法点击，请复制以下链接到浏览器打开：<br/>${params.resetLink}</p>
+      <p style="font-size: 12px; color: #64748b; word-break: break-all;">若按钮无法点击，请复制以下链接到浏览器打开：<br/>${safeResetLink}</p>
     </div>
   `
 
-  const textPreview = `${vipLabel} (${expireDesc}) | 临时密码: ${params.tempPassword}`
+  const textPreview = `${vipLabel} (${expireDesc})`
 
   return sendSystemEmail({
     to: params.email,

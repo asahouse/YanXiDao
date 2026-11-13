@@ -83,6 +83,12 @@ const adminAuthRateLimiter = createRateLimiter({
   message: '后台登录尝试过于频繁，请稍后再试',
 })
 
+const ttsRateLimiter = createRateLimiter({
+  windowMs: 60 * 1000,
+  max: 60,
+  message: '语音合成请求过于频繁，请稍后再试',
+})
+
 // Health Check
 app.get('/api/health', async (_, res) => {
   try {
@@ -142,8 +148,15 @@ async function requireUser(req: express.Request, res: express.Response, next: ex
   if (!payload?.sub) {
     return res.status(401).json({ error: '请先登录账号后再执行此操作' })
   }
-  if (payload.sid && payload.clientType) {
-    try {
+  try {
+    const [userRows] = await pool.query<any[]>('SELECT status FROM user_profile WHERE id = ? LIMIT 1;', [payload.sub])
+    if (userRows.length === 0) {
+      return res.status(401).json({ error: '账号不存在或已被删除', code: 'SESSION_EXPIRED' })
+    }
+    if (userRows[0].status === 'disabled') {
+      return res.status(403).json({ error: '您的账号已被管理员停用，如有疑问请联系管理员', disabled: true, code: 'ACCOUNT_DISABLED' })
+    }
+    if (payload.sid && payload.clientType) {
       const slotId = `${payload.sub}:${payload.clientType}`
       const [rows] = await pool.query<any[]>('SELECT session_id FROM user_sessions WHERE id = ? LIMIT 1;', [slotId])
       if (rows.length === 0) {
@@ -157,9 +170,9 @@ async function requireUser(req: express.Request, res: express.Response, next: ex
           clientType: payload.clientType,
         })
       }
-    } catch (err: unknown) {
-      return res.status(500).json({ error: (err as Error).message })
     }
+  } catch (err: unknown) {
+    return res.status(500).json({ error: (err as Error).message })
   }
   ;(req as any).userId = payload.sub
   ;(req as any).clientType = payload.clientType || 'web'
@@ -172,11 +185,23 @@ function resolveUserIdFromReq(req: express.Request): string {
 }
 
 function getClientOrigin(req: express.Request): string {
+  const configured = process.env.YANXIDAO_PUBLIC_URL?.trim()
+  if (configured) return configured.replace(/\/+$/, '')
+
   const origin = req.headers.origin
-  if (origin && typeof origin === 'string') return origin
-  const host = req.headers.host || 'localhost:5173'
-  const proto = req.protocol || 'http'
-  return `${proto}://${host}`
+  if (origin && typeof origin === 'string') {
+    const allowedOrigins = (process.env.YANXIDAO_CORS_ORIGINS || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean)
+    if (
+      /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin) ||
+      allowedOrigins.includes(origin)
+    ) {
+      return origin.replace(/\/+$/, '')
+    }
+  }
+  return 'http://localhost:5173'
 }
 
 async function syncAndFormatUserProfile(r: any) {
@@ -461,18 +486,16 @@ app.post('/api/auth/forgot-password', authRateLimiter, async (req, res) => {
     if (user.status === 'disabled') {
       return res.status(403).json({ error: '您的账号已被管理员停用，无法重置密码' })
     }
-    const tempPwd = generateTempPassword8()
     const resetToken = generateResetToken()
     const expires = formatLocalDateTime(new Date(Date.now() + 24 * 60 * 60 * 1000))
     await pool.query(
-      'UPDATE user_profile SET password_hash = ?, must_change_password = 1, reset_token = ?, reset_token_expires = ? WHERE id = ?;',
-      [hashPassword(tempPwd), resetToken, expires, user.id]
+      'UPDATE user_profile SET reset_token = ?, reset_token_expires = ? WHERE id = ?;',
+      [resetToken, expires, user.id]
     )
     const resetLink = `${getClientOrigin(req)}/change-password?token=${resetToken}`
     const emailRes = await sendAccountProvisionEmail({
       email: user.email,
       nickname: user.nickname,
-      tempPassword: tempPwd,
       resetLink,
       vipType: user.vip_type || 'free',
       vipExpireAt: user.vip_expire_at,
@@ -790,9 +813,10 @@ app.post('/api/user/sync', requireUser, async (req, res) => {
 })
 
 // ==================== User Settings & Navigation Menu ====================
-app.get('/api/user/settings', async (_, res) => {
+app.get('/api/user/settings', requireUser, async (req, res) => {
   try {
-    const [rows] = await pool.query<any[]>('SELECT settings_json FROM user_profile WHERE id = \'8723192\' LIMIT 1;')
+    const userId = (req as any).userId as string
+    const [rows] = await pool.query<any[]>('SELECT settings_json FROM user_profile WHERE id = ? LIMIT 1;', [userId])
     if (rows.length === 0 || !rows[0].settings_json) {
       return res.json(null)
     }
@@ -805,19 +829,21 @@ app.get('/api/user/settings', async (_, res) => {
   }
 })
 
-app.put('/api/user/settings', async (req, res) => {
+app.put('/api/user/settings', requireUser, async (req, res) => {
   try {
+    const userId = (req as any).userId as string
     const settings = req.body
-    await pool.query('UPDATE user_profile SET settings_json = ? WHERE id = \'8723192\';', [JSON.stringify(settings)])
+    await pool.query('UPDATE user_profile SET settings_json = ? WHERE id = ?;', [JSON.stringify(settings), userId])
     res.json({ success: true })
   } catch (err: unknown) {
     res.status(500).json({ error: (err as Error).message })
   }
 })
 
-app.get('/api/user/menu', async (_, res) => {
+app.get('/api/user/menu', requireUser, async (req, res) => {
   try {
-    const [rows] = await pool.query<any[]>('SELECT menu_config_json FROM user_profile WHERE id = \'8723192\' LIMIT 1;')
+    const userId = (req as any).userId as string
+    const [rows] = await pool.query<any[]>('SELECT menu_config_json FROM user_profile WHERE id = ? LIMIT 1;', [userId])
     if (rows.length === 0 || !rows[0].menu_config_json) {
       return res.json(null)
     }
@@ -830,17 +856,18 @@ app.get('/api/user/menu', async (_, res) => {
   }
 })
 
-app.put('/api/user/menu', async (req, res) => {
+app.put('/api/user/menu', requireUser, async (req, res) => {
   try {
+    const userId = (req as any).userId as string
     const menuConfig = req.body
-    await pool.query('UPDATE user_profile SET menu_config_json = ? WHERE id = \'8723192\';', [JSON.stringify(menuConfig)])
+    await pool.query('UPDATE user_profile SET menu_config_json = ? WHERE id = ?;', [JSON.stringify(menuConfig), userId])
     res.json({ success: true })
   } catch (err: unknown) {
     res.status(500).json({ error: (err as Error).message })
   }
 })
 
-app.get('/api/user/purchases', async (_, res) => {
+app.get('/api/user/purchases', requireUser, async (_, res) => {
   try {
     const [rows] = await pool.query<any[]>('SELECT * FROM purchase_records ORDER BY purchase_time DESC;')
     res.json(rows.map(r => ({
@@ -2112,7 +2139,8 @@ app.post('/api/reports', async (req, res) => {
 })
 
 // ==================== Microsoft Edge Neural TTS & Audio Cache ====================
-const TTS_CACHE_DIR = path.join(PROJECT_ROOT, 'data', 'tts-cache')
+const TTS_DATA_DIR = process.env.YANXIDAO_DATA_DIR || path.join(PROJECT_ROOT, 'data')
+const TTS_CACHE_DIR = path.join(TTS_DATA_DIR, 'tts-cache')
 if (!fs.existsSync(TTS_CACHE_DIR)) {
   fs.mkdirSync(TTS_CACHE_DIR, { recursive: true })
 }
@@ -2191,13 +2219,17 @@ async function synthesizeEdgeAudio(text: string, voice = 'en-US-AvaNeural', spee
   }
 }
 
-app.get('/api/tts', async (req, res) => {
+app.get('/api/tts', ttsRateLimiter, async (req, res) => {
   try {
     const text = (req.query.text as string || '').trim()
     if (!text) {
       return res.status(400).json({ error: 'Text query parameter is required' })
     }
-    const voice = (req.query.voice as string || 'en-US-AvaNeural').trim()
+    if (text.length > 500) {
+      return res.status(400).json({ error: 'Text length cannot exceed 500 characters' })
+    }
+    const rawVoice = (req.query.voice as string || 'en-US-AvaNeural').trim()
+    const voice = /^[a-zA-Z0-9-]+$/.test(rawVoice) ? rawVoice : 'en-US-AvaNeural'
     const speed = parseFloat(req.query.speed as string) || 1.0
 
     const audioBuf = await synthesizeEdgeAudio(text, voice, speed)
@@ -2932,6 +2964,9 @@ app.put('/api/admin/users/:id/status', async (req, res) => {
     if (uRows.length === 0) return res.status(404).json({ error: '用户不存在' })
 
     await pool.query('UPDATE user_profile SET status = ? WHERE id = ?;', [status, id])
+    if (status === 'disabled') {
+      await pool.query('DELETE FROM user_sessions WHERE user_id = ?;', [id])
+    }
     await logAdminAudit(adminUsername, status === 'disabled' ? 'DISABLE_USER' : 'ENABLE_USER', id, uRows[0].email || '', status === 'disabled' ? '停用账号' : '启用账号')
     res.json({ success: true, status })
   } catch (err: unknown) {
@@ -3164,6 +3199,8 @@ app.delete('/api/admin/users/:id', async (req, res) => {
     const [rows] = await pool.query<any[]>('SELECT email, nickname FROM user_profile WHERE id = ? LIMIT 1;', [id])
     const targetEmail = rows[0]?.email || ''
 
+    await pool.query('DELETE FROM user_sessions WHERE user_id = ?;', [id])
+    await pool.query('DELETE FROM sync_events WHERE user_id = ?;', [id])
     await pool.query('DELETE FROM user_course_progress WHERE user_id = ?;', [id])
     await pool.query('DELETE FROM user_favorites WHERE user_id = ?;', [id])
     await pool.query('DELETE FROM user_favorite_sentences WHERE user_id = ?;', [id])
@@ -3506,6 +3543,7 @@ app.post('/api/sync/remote', async (req, res) => {
     const response = await fetch(targetUrl, {
       method: 'GET',
       headers: { Accept: 'application/json' },
+      redirect: 'error',
       signal: AbortSignal.timeout(30000),
     })
 

@@ -20,14 +20,7 @@ try {
     packages: 'external',
     sourcemap: true,
     banner: {
-      js: `
-import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
-const require = createRequire(import.meta.url);
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-`
+      js: `import { createRequire as __createRequire } from 'node:module'; const require = __createRequire(import.meta.url);`
     }
   });
   console.log('[Build Server] Successfully built dist-server/index.mjs!');
