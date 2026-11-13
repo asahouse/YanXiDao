@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGradCet6" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1B0033" />
+      <stop offset="50%" stop-color="#120024" />
+      <stop offset="100%" stop-color="#07000F" />
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D946EF" />
+      <stop offset="100%" stop-color="#8B5CF6" />
+    </linearGradient>
+    <filter id="shadow6" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="600" height="800" rx="8" fill="url(#bgGradCet6)" />
+
+  <!-- Book Spine 3D Effect -->
+  <rect x="0" y="0" width="24" height="800" fill="#ffffff" fill-opacity="0.08" />
+  <line x1="24" y1="0" x2="24" y2="800" stroke="#000000" stroke-opacity="0.4" stroke-width="2" />
+
+  <!-- Top Tag -->
+  <rect x="50" y="45" width="240" height="26" rx="4" fill="#a855f7" fill-opacity="0.22" stroke="#a855f7" stroke-width="1.5" />
+  <text x="62" y="63" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="13" font-weight="700" fill="#d8b4fe">全国大学英语六级高分冲关</text>
+
+  <!-- Top Right Badge -->
+  <g transform="translate(460, 40)" filter="url(#shadow6)">
+    <circle cx="45" cy="45" r="42" fill="#7c3aed" stroke="#c084fc" stroke-width="2.5" />
+    <text x="45" y="38" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="13" font-weight="800" fill="#FFFFFF">CET-6</text>
+    <text x="45" y="58" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="18" font-weight="900" fill="#facc15">卓越高分</text>
+  </g>
+
+  <!-- Title Section -->
+  <path d="M 50 160 L 550 160" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1" />
+  <text x="50" y="230" font-family="'Helvetica Neue', Arial, sans-serif" font-size="52" font-weight="900" fill="#FFFFFF" letter-spacing="2">CET-6 ADVANCED</text>
+  <text x="50" y="275" font-family="'Helvetica Neue', Arial, sans-serif" font-size="19" font-weight="700" fill="#c084fc" letter-spacing="3">ADVANCED SYNTAX &amp; ESSAY WRITING</text>
+
+  <text x="50" y="370" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="44" font-weight="900" fill="#FFFFFF">大学英语六级</text>
+  <text x="50" y="435" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="32" font-weight="800" fill="url(#purpleGrad)">核心长难句与高分写作突破</text>
+
+  <!-- Feature Tags -->
+  <g transform="translate(50, 480)">
+    <rect width="500" height="150" rx="12" fill="#130222" fill-opacity="0.85" stroke="#3b0764" stroke-width="1.5" />
+    
+    <circle cx="30" cy="38" r="6" fill="#c084fc" />
+    <text x="48" y="43" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="15" font-weight="600" fill="#E2E8F0">学术讲座 (Lectures) 与长对话深层听力突破</text>
+
+    <circle cx="30" cy="78" r="6" fill="#f43f5e" />
+    <text x="48" y="83" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="15" font-weight="600" fill="#E2E8F0">多重嵌套长难句结构拆解与逻辑连词精讲</text>
+
+    <circle cx="30" cy="118" r="6" fill="#facc15" />
+    <text x="48" y="123" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="15" font-weight="600" fill="#E2E8F0">社会思辨类议论文写作高级替换句式库</text>
+  </g>
+
+  <!-- Footer -->
+  <g transform="translate(50, 710)">
+    <line x1="0" y1="0" x2="500" y2="0" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1" />
+    <text x="0" y="35" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="15" font-weight="700" fill="#94A3B8">高等教育大学英语四六级教研组</text>
+    <text x="500" y="35" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="14" font-weight="600" fill="#64748B">大二/大三 · 进阶必刷</text>
+  </g>
+</svg>

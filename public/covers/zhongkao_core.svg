@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141E30" />
+      <stop offset="50%" stop-color="#243B55" />
+      <stop offset="100%" stop-color="#0F2027" />
+    </linearGradient>
+
+    <!-- Gold Accent Gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE000" />
+      <stop offset="50%" stop-color="#799F0C" />
+      <stop offset="100%" stop-color="#F7971E" />
+    </linearGradient>
+
+    <linearGradient id="badgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF512F" />
+      <stop offset="100%" stop-color="#DD2476" />
+    </linearGradient>
+
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- Book Base Background -->
+  <rect width="600" height="800" rx="8" fill="url(#bgGrad)" />
+
+  <!-- Book Spine 3D Effect on Left -->
+  <rect x="0" y="0" width="24" height="800" fill="#ffffff" fill-opacity="0.06" />
+  <line x1="24" y1="0" x2="24" y2="800" stroke="#000000" stroke-opacity="0.3" stroke-width="2" />
+
+  <!-- Top Ministry / Curriculum Bar -->
+  <rect x="50" y="45" width="220" height="26" rx="4" fill="#38ef7d" fill-opacity="0.2" stroke="#11998e" stroke-width="1.5" />
+  <text x="62" y="63" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="13" font-weight="700" fill="#38ef7d">义务教育新课标 · 考点特训</text>
+
+  <!-- Top Right Special Sprint Badge -->
+  <g transform="translate(460, 40)" filter="url(#shadow)">
+    <circle cx="45" cy="45" r="42" fill="url(#badgeGrad)" stroke="#FFE000" stroke-width="2" />
+    <text x="45" y="38" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="13" font-weight="800" fill="#FFFFFF">中考冲刺</text>
+    <text x="45" y="58" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="18" font-weight="900" fill="#FFE000">满分版</text>
+  </g>
+
+  <!-- Geometric Abstract Tech Accents -->
+  <circle cx="500" cy="400" r="180" fill="#4facfe" fill-opacity="0.05" />
+  <circle cx="100" cy="550" r="140" fill="#00f2fe" fill-opacity="0.04" />
+  <path d="M 50 160 L 550 160" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1" />
+
+  <!-- Big Title English -->
+  <text x="50" y="230" font-family="'Helvetica Neue', Arial, sans-serif" font-size="54" font-weight="900" fill="#FFFFFF" letter-spacing="2">ENGLISH</text>
+  <text x="50" y="275" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#00f2fe" letter-spacing="4">ZHONGKAO SPRINT &amp; SYNTAX</text>
+
+  <!-- Chinese Main Title -->
+  <text x="50" y="370" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="46" font-weight="900" fill="#FFFFFF">中考英语</text>
+  <text x="50" y="435" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="34" font-weight="800" fill="#FFE000">核心满分句型突破</text>
+
+  <!-- Feature Tags / Highlights Box -->
+  <g transform="translate(50, 480)">
+    <rect width="500" height="150" rx="12" fill="#0b1728" fill-opacity="0.75" stroke="#2c3e50" stroke-width="1.5" />
+    
+    <!-- Tag 1 -->
+    <circle cx="30" cy="38" r="6" fill="#38ef7d" />
+    <text x="48" y="43" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="16" font-weight="600" fill="#E2E8F0">中考定语 / 宾语 / 状语从句专项解密</text>
+
+    <!-- Tag 2 -->
+    <circle cx="30" cy="78" r="6" fill="#00f2fe" />
+    <text x="48" y="83" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="16" font-weight="600" fill="#E2E8F0">初中必背 100 高频满分复合句精听精练</text>
+
+    <!-- Tag 3 -->
+    <circle cx="30" cy="118" r="6" fill="#FFE000" />
+    <text x="48" y="123" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="16" font-weight="600" fill="#E2E8F0">考前冲刺强化 · 听说读写全场景速成</text>
+  </g>
+
+  <!-- Bottom Publisher / Series Footer -->
+  <g transform="translate(50, 710)">
+    <line x1="0" y1="0" x2="500" y2="0" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1" />
+    <text x="0" y="35" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="16" font-weight="700" fill="#94A3B8">研习岛教研组 · 核心名师推荐教材</text>
+    <text x="500" y="35" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Microsoft YaHei', sans-serif" font-size="14" font-weight="600" fill="#64748B">初三年级·冲刺专用</text>
+  </g>
+</svg>

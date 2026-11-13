@@ -1,0 +1,1148 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  --bg-primary: #0a0c13;
+  --bg-secondary: #12151f;
+  --bg-card: #181c2b;
+  --bg-card-hover: #20263a;
+  --border-subtle: #252b3d;
+  --border-active: #4f46e5;
+  --text-main: #f1f5f9;
+  --text-muted: #8e9bb2;
+  --brand-blue: #3b82f6;
+  --brand-purple: #6366f1;
+  --accent-green: #10b981;
+  --accent-red: #ef4444;
+
+  /* Personalized customizable variables */
+  --user-input-color: #38bdf8;
+  --user-practice-text-color: #ffffff;
+  --user-practice-bg: #0a0c13;
+  --user-card-bg: #1e2235;
+  --user-font-size-input: 24px;
+  --user-font-size-result: 22px;
+}
+
+:root.light, html.light {
+  color-scheme: light;
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --border-subtle: #e2e8f0;
+  --border-active: #6366f1;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --brand-blue: #2563eb;
+  --brand-purple: #6366f1;
+  --accent-green: #059669;
+  --accent-red: #dc2626;
+
+  --user-input-color: #0284c7;
+  --user-practice-text-color: #0f172a;
+  --user-practice-bg: #f8fafc;
+  --user-card-bg: #ffffff;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+  user-select: none;
+  scrollbar-color: #2b3247 #0a0c13;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ========================================================================= */
+/* Light Mode Foundation Overrides (White-based modern UI)                   */
+/* ========================================================================= */
+html.light body {
+  background-color: #f8fafc;
+  color: #0f172a;
+  scrollbar-color: #cbd5e1 #f8fafc;
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Structural canvases */
+html.light .bg-\[\#0a0c13\],
+html.light .bg-\[\#0a0c14\] {
+  background-color: #f8fafc !important;
+}
+
+/* Sidebar & Header */
+html.light .bg-\[\#0c0e17\],
+html.light .bg-\[\#0c0e17\]\/80,
+html.light .bg-\[\#0d101b\],
+html.light .bg-\[\#0f121d\] {
+  background-color: #ffffff !important;
+}
+
+/* Cards, Panels & Lesson Workstation Rows */
+html.light .bg-\[\#0e121f\],
+html.light .bg-\[\#0e1220\]\/90,
+html.light .bg-\[\#12151f\],
+html.light .bg-\[\#121624\],
+html.light .bg-\[\#121629\]\/95,
+html.light .bg-\[\#141826\],
+html.light .bg-\[\#181c2b\],
+html.light .bg-\[\#181c2d\],
+html.light .bg-\[\#1e2235\],
+html.light .bg-\[\#1e2336\],
+html.light .bg-\[\#121522\],
+html.light .bg-\[\#121522\]\/90,
+html.light .bg-\[\#161c2e\],
+html.light .bg-\[\#181d33\] {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+}
+
+/* Secondary controls, chips, table headers, pills, input wrappers & action buttons */
+html.light .bg-\[\#090b14\],
+html.light .bg-\[\#101422\],
+html.light .bg-\[\#121520\],
+html.light .bg-\[\#151928\],
+html.light .bg-\[\#151928\]\/80,
+html.light .bg-\[\#161a2b\],
+html.light .bg-\[\#181d2f\],
+html.light .bg-\[\#181d30\],
+html.light .bg-\[\#181f33\],
+html.light .bg-\[\#191e30\],
+html.light .bg-\[\#1a1f33\],
+html.light .bg-\[\#1a1f33\]\/60,
+html.light .bg-\[\#1a2034\],
+html.light .bg-\[\#1a2035\],
+html.light .bg-\[\#1c2132\],
+html.light .bg-\[\#1d2235\],
+html.light .bg-\[\#1e2338\],
+html.light .bg-\[\#1e2436\],
+html.light .bg-\[\#1e2438\],
+html.light .bg-\[\#20263c\],
+html.light .bg-\[\#20273c\],
+html.light .bg-\[\#202740\],
+html.light .bg-\[\#202944\],
+html.light .bg-\[\#22283e\],
+html.light .bg-\[\#222a44\],
+html.light .bg-\[\#23293f\],
+html.light .bg-\[\#232b45\],
+html.light .bg-\[\#252b41\],
+html.light .bg-\[\#252c46\],
+html.light .bg-\[\#252c48\],
+html.light .bg-\[\#262c44\],
+html.light .bg-\[\#272d45\],
+html.light .bg-\[\#272e47\],
+html.light .bg-\[\#28314e\],
+html.light .bg-\[\#2b334d\],
+html.light .bg-\[\#2b3452\],
+html.light .bg-\[\#2d3652\],
+html.light .bg-\[\#2e3754\],
+html.light .bg-\[\#2f3755\],
+html.light .bg-\[\#2f3856\],
+html.light .bg-\[\#343e5c\] {
+  background-color: #f1f5f9 !important;
+}
+
+html.light .hover\:bg-\[\#151928\]:hover,
+html.light .hover\:bg-\[\#191e30\]:hover,
+html.light .hover\:bg-\[\#1a2034\]:hover,
+html.light .hover\:bg-\[\#1d2338\]:hover,
+html.light .hover\:bg-\[\#1e2338\]:hover,
+html.light .hover\:bg-\[\#1e243b\]:hover,
+html.light .hover\:bg-\[\#20273c\]:hover,
+html.light .hover\:bg-\[\#202740\]:hover,
+html.light .hover\:bg-\[\#202944\]:hover,
+html.light .hover\:bg-\[\#222840\]:hover,
+html.light .hover\:bg-\[\#23293f\]:hover,
+html.light .hover\:bg-\[\#232b45\]:hover,
+html.light .hover\:bg-\[\#252c46\]:hover,
+html.light .hover\:bg-\[\#252c48\]:hover,
+html.light .hover\:bg-\[\#262e49\]:hover,
+html.light .hover\:bg-\[\#28314e\]:hover,
+html.light .hover\:bg-\[\#2b334d\]:hover,
+html.light .hover\:bg-\[\#2b3452\]:hover,
+html.light .hover\:bg-\[\#2e3754\]:hover,
+html.light .hover\:bg-\[\#303754\]:hover,
+html.light .hover\:bg-\[\#323a59\]:hover,
+html.light .hover\:bg-\[\#343e5c\]:hover {
+  background-color: #e2e8f0 !important;
+}
+
+html.light .bg-\[\#1c2237\],
+html.light .bg-indigo-950\/30,
+html.light .bg-indigo-950\/40,
+html.light .bg-indigo-950\/50 {
+  background-color: #eef2ff !important;
+  color: #4338ca !important;
+}
+
+html.light .bg-purple-900\/30 {
+  background-color: #f3e8ff !important;
+  color: #7e22ce !important;
+  border-color: #d8b4fe !important;
+}
+html.light .bg-purple-900\/30 * {
+  color: #7e22ce !important;
+}
+
+/* Card Corner Badges & Star Buttons in Light Mode */
+html.light .card-type-tag,
+html.light [class*="top-2.5"][class*="left-2.5"].bg-black\/60,
+html.light [class*="top-2.5"][class*="left-2.5"].bg-black\/50 {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  color: #1e293b !important;
+  border-color: rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light .card-star-btn,
+html.light [class*="top-2.5"][class*="right-2.5"].bg-black\/60,
+html.light [class*="top-2.5"][class*="right-2.5"].bg-black\/50 {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.1) !important;
+}
+html.light .card-star-btn:hover,
+html.light [class*="top-2.5"][class*="right-2.5"].bg-black\/60:hover,
+html.light [class*="top-2.5"][class*="right-2.5"].bg-black\/50:hover {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+html.light [class*="from-\[\#0e111a\]"] {
+  --tw-gradient-from: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Learning Content Drawer in Light Mode */
+html.light .drawer-tabs-wrapper,
+html.light .bg-\[\#101422\] {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+}
+html.light .drawer-tabs-wrapper button:not(.bg-indigo-600) {
+  color: #64748b !important;
+}
+html.light .drawer-tabs-wrapper button:not(.bg-indigo-600):hover {
+  color: #0f172a !important;
+}
+html.light .drawer-item-active,
+html.light .bg-\[\#222a44\] {
+  background-color: #eef2ff !important;
+  border-color: #818cf8 !important;
+  box-shadow: 0 2px 8px -1px rgba(99, 102, 241, 0.15) !important;
+}
+html.light .drawer-item-active .text-slate-100,
+html.light .bg-\[\#222a44\] .text-slate-100 {
+  color: #1e1b4b !important;
+}
+html.light .drawer-item-active .text-slate-400,
+html.light .bg-\[\#222a44\] .text-slate-400 {
+  color: #4338ca !important;
+}
+
+/* Category Pill Buttons (Smooth Shadow Transition, No Clipping) */
+.category-pill-btn.is-active {
+  background-color: #6366f1 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px -1px rgba(99, 102, 241, 0.45) !important;
+}
+
+html.light .category-pill-btn.is-active {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px -2px rgba(79, 70, 229, 0.3) !important;
+}
+
+html.light .category-pill-btn:not(.is-active) {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+html.light .category-pill-btn:not(.is-active):hover {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Grade Sub-Filter Buttons in Light Mode */
+html.light .grade-pill-btn.is-active {
+  background-color: #eef2ff !important;
+  border-color: #818cf8 !important;
+  color: #4338ca !important;
+}
+
+html.light .grade-pill-btn:not(.is-active) {
+  color: #64748b !important;
+}
+
+html.light .grade-pill-btn:not(.is-active):hover {
+  color: #0f172a !important;
+  background-color: #f1f5f9 !important;
+}
+
+/* ContentsDrawer question index tags (#1, #2, etc.) */
+html.light .drawer-index-tag:not(.bg-indigo-600),
+html.light .bg-\[\#20263b\] {
+  background-color: #e2e8f0 !important;
+  color: #475569 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+html.light .drawer-index-tag.bg-indigo-600 {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+}
+
+/* Personalization font size options */
+html.light .font-size-btn.is-inactive,
+html.light .bg-\[\#1b2034\] {
+  background-color: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #475569 !important;
+}
+html.light .font-size-btn.is-inactive:hover {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+html.light .font-size-btn.is-active {
+  background-color: #eef2ff !important;
+  border: 1px solid #6366f1 !important;
+  color: #4338ca !important;
+  font-weight: 600 !important;
+}
+html.light .font-size-btn.is-inactive .border-slate-600 {
+  border-color: #cbd5e1 !important;
+  background-color: #ffffff !important;
+}
+
+/* ReportModal report type buttons */
+html.light .report-type-btn.is-active {
+  background-color: #e0e7ff !important;
+  border: 2px solid #6366f1 !important;
+  color: #3730a3 !important;
+  font-weight: 700 !important;
+}
+html.light .report-type-btn.is-inactive {
+  background-color: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #475569 !important;
+  font-weight: 500 !important;
+}
+html.light .report-type-btn.is-inactive:hover {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Course & Teaching Card Star Button */
+html.light .card-star-btn,
+html.light [class*="top-2.5"][class*="right-2.5"].bg-black\/50 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.12) !important;
+}
+html.light .card-star-btn:hover,
+html.light [class*="top-2.5"][class*="right-2.5"].bg-black\/50:hover {
+  background-color: #ffffff !important;
+  border-color: #94a3b8 !important;
+}
+html.light .card-star-btn .text-white\/60,
+html.light [class*="top-2.5"][class*="right-2.5"] .text-white\/60 {
+  color: #64748b !important;
+}
+html.light .card-star-btn:hover .text-white\/60,
+html.light [class*="top-2.5"][class*="right-2.5"]:hover .text-white\/60 {
+  color: #f59e0b !important;
+}
+html.light .bg-\[\#1e2438\] {
+  background-color: #f1f5f9 !important;
+  color: #334155 !important;
+}
+html.light .border-\[\#2a324d\] {
+  border-color: #cbd5e1 !important;
+}
+
+/* Modal Cancel Buttons in Light Mode */
+html.light .modal-btn-cancel,
+html.light .bg-\[\#252b41\] {
+  background-color: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #334155 !important;
+}
+html.light .modal-btn-cancel:hover,
+html.light .hover\:bg-\[\#303754\]:hover {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Share Achievement Button in Light Mode */
+html.light .share-achievement-btn {
+  background: linear-gradient(to right, #eef2ff, #f3e8ff) !important;
+  color: #4f46e5 !important;
+  border: 1px solid #c7d2fe !important;
+  box-shadow: 0 1px 3px 0 rgba(99, 102, 241, 0.1) !important;
+}
+html.light .share-achievement-btn:hover {
+  background: linear-gradient(to right, #e0e7ff, #ede9fe) !important;
+  border-color: #a5b4fc !important;
+}
+html.light .share-achievement-btn * {
+  color: #4f46e5 !important;
+}
+
+/* Admin Table Header in Light Mode */
+html.light .admin-table-head,
+html.light thead.bg-\[\#101422\] {
+  background-color: #f8fafc !important;
+  border-bottom-color: #e2e8f0 !important;
+  color: #475569 !important;
+}
+html.light .admin-table-head th,
+html.light thead.bg-\[\#101422\] th {
+  color: #475569 !important;
+}
+/* Admin & Category Table Dividers in Light Mode (Supporting Tailwind v4 :not(:last-child) and v3) */
+html.light tbody.divide-\[\#1e2438\] > *,
+html.light .divide-\[\#1e2438\] > *,
+html.light .divide-\[\#1e2438\] > :not(:last-child),
+html.light .divide-\[\#1e2438\] > :not([hidden]) ~ :not([hidden]),
+html.light .category-tbody > *,
+html.light .category-table-row {
+  border-color: #e2e8f0 !important;
+  border-top-color: #e2e8f0 !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+/* Practice View - Sentence Word Cards in Light Mode */
+html.light .sentence-word-card.is-active {
+  background-color: #eef2ff !important;
+  border-color: #6366f1 !important;
+  box-shadow: 0 4px 14px -2px rgba(99, 102, 241, 0.25) !important;
+}
+html.light .sentence-word-card.is-active .text-indigo-300 {
+  color: #4f46e5 !important;
+}
+html.light .sentence-word-card.is-completed,
+html.light .bg-\[\#121624\]\/80 {
+  background-color: #ecfdf5 !important;
+  border-color: #6ee7b7 !important;
+}
+html.light .sentence-word-card.is-completed * {
+  color: #065f46 !important;
+}
+html.light .sentence-word-card.is-pending,
+html.light .bg-\[\#121624\]\/60 {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+}
+html.light .sentence-word-card.is-pending:hover,
+html.light .hover\:bg-\[\#181d2f\]\/70:hover {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+html.light .sentence-word-card.is-pending .text-slate-500 {
+  color: #64748b !important;
+}
+html.light .sentence-word-card .text-slate-600 {
+  color: #94a3b8 !important;
+}
+html.light .sentence-word-card .text-slate-400 {
+  color: #64748b !important;
+}
+html.light .sentence-word-card .bg-slate-700 {
+  background-color: #e2e8f0 !important;
+}
+
+/* Personal Learning Progress Banner (Course Detail) in Light Mode */
+html.light .user-progress-banner {
+  background: linear-gradient(to right, #eef2ff 0%, #f5f3ff 100%) !important;
+  border-color: #c7d2fe !important;
+  box-shadow: 0 4px 16px -2px rgba(99, 102, 241, 0.12), 0 2px 4px -2px rgba(99, 102, 241, 0.08) !important;
+}
+html.light .user-progress-banner .user-progress-banner-title {
+  color: #0f172a !important;
+}
+html.light .user-progress-banner .text-slate-300 {
+  color: #334155 !important;
+}
+html.light .user-progress-banner .text-slate-400 {
+  color: #64748b !important;
+}
+html.light .user-progress-banner .bg-indigo-600\/30 {
+  background-color: #e0e7ff !important;
+  border-color: #c7d2fe !important;
+  color: #4f46e5 !important;
+}
+html.light .user-progress-banner .fill-indigo-400 {
+  fill: #4f46e5 !important;
+}
+
+/* Action Button ("继续上次进度") on Progress Banner: Pure Crisp White Text & Icon */
+html.light .user-progress-continue-btn,
+html.light .user-progress-banner button,
+html.light .user-progress-banner .user-progress-continue-btn {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+}
+html.light .user-progress-continue-btn:hover,
+html.light .user-progress-banner button:hover {
+  background-color: #4338ca !important;
+}
+html.light .user-progress-continue-btn *,
+html.light .user-progress-banner button * {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* User Avatar Backgrounds (Transparent PNG Support: Dark = Deep Blue #181d2f, Light = White #ffffff) */
+.user-avatar-wrap,
+.user-avatar-img,
+.user-avatar-bg {
+  background-color: #181d2f !important;
+}
+
+html.light .user-avatar-wrap,
+html.light .user-avatar-img,
+html.light .user-avatar-bg {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
+}
+
+/* User Center & Avatar Selection Modal in Light Mode */
+html.light .user-center-card,
+html.light .bg-\[\#1d2235\],
+html.light .bg-\[\#161a29\] {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+html.light .bg-\[\#1a1f31\] {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+html.light .bg-\[\#1a1f31\]:hover {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+html.light .border-\[\#242b41\],
+html.light .border-\[\#252c42\],
+html.light .border-\[\#272d45\],
+html.light .border-\[\#2a324d\] {
+  border-color: #e2e8f0 !important;
+}
+html.light .user-center-card .text-slate-100,
+html.light .user-center-card .text-slate-200,
+html.light .bg-\[\#1d2235\] .text-slate-100,
+html.light .bg-\[\#1d2235\] .text-slate-200 {
+  color: #0f172a !important;
+}
+html.light .user-center-card .text-slate-400,
+html.light .bg-\[\#1d2235\] .text-slate-400 {
+  color: #64748b !important;
+}
+html.light .bg-\[\#272e47\] {
+  background-color: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #334155 !important;
+}
+html.light .bg-\[\#121520\] {
+  background-color: #ffffff !important;
+  border-color: #6366f1 !important;
+  color: #0f172a !important;
+}
+
+/* Common Background Elements (Pills, Underlines, Tracks) */
+html.light .bg-slate-700 {
+  background-color: #e2e8f0 !important;
+  color: #334155 !important;
+}
+html.light .bg-slate-800:not(.keep-dark):not(img):not(video) {
+  background-color: #e2e8f0 !important;
+}
+
+/* Light badge adjustments for high readability */
+html.light .bg-purple-500\/20 {
+  background-color: #f3e8ff !important;
+  color: #7e22ce !important;
+  border-color: #e9d5ff !important;
+}
+html.light .bg-emerald-500\/15,
+html.light .bg-emerald-500\/20 {
+  background-color: #ecfdf5 !important;
+  color: #059669 !important;
+  border-color: #a7f3d0 !important;
+}
+html.light .bg-amber-500\/15,
+html.light .bg-amber-500\/20 {
+  background-color: #fffbeb !important;
+  color: #b45309 !important;
+  border-color: #fde68a !important;
+}
+html.light .bg-indigo-500\/15,
+html.light .bg-indigo-500\/20,
+html.light .bg-indigo-600\/20 {
+  background-color: #eef2ff !important;
+  color: #4f46e5 !important;
+  border-color: #c7d2fe !important;
+}
+
+/* High Contrast Accent Text for Light Mode */
+html.light .text-indigo-300,
+html.light .text-indigo-400 {
+  color: #4f46e5 !important;
+}
+html.light .text-emerald-300 {
+  color: #059669 !important;
+}
+html.light .text-amber-300 {
+  color: #b45309 !important;
+}
+
+/* Universal Borders Override */
+html.light [class*="border-\[\#1"],
+html.light [class*="border-\[\#2"],
+html.light [class*="border-\[\#3"],
+html.light .border-slate-800,
+html.light .border-slate-700 {
+  border-color: #e2e8f0 !important;
+}
+
+/* Typography */
+html.light h1, html.light h2, html.light h3, html.light h4 {
+  color: #0f172a;
+}
+
+html.light .text-white:not([class*="bg-indigo"]):not([class*="bg-blue"]):not([class*="bg-emerald"]):not([class*="bg-purple"]):not([class*="bg-rose"]):not([class*="bg-red"]):not(.keep-white) {
+  color: #0f172a !important;
+}
+
+html.light .text-slate-100 {
+  color: #0f172a !important;
+}
+
+html.light .text-slate-200 {
+  color: #1e293b !important;
+}
+
+html.light .text-slate-300 {
+  color: #334155 !important;
+}
+
+html.light .text-slate-400 {
+  color: #64748b !important;
+}
+
+html.light .text-slate-500 {
+  color: #64748b !important;
+}
+
+/* Form Controls */
+html.light input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html.light textarea,
+html.light select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Preservation of white text on solid colored action buttons (excluding opacity variants like /20) */
+html.light button.bg-indigo-600:not([class*="/"]),
+html.light button.bg-blue-600:not([class*="/"]),
+html.light button.bg-emerald-600:not([class*="/"]),
+html.light a.bg-indigo-600:not([class*="/"]),
+html.light .bg-indigo-600:not([class*="/"]):not(.admin-practice-btn):not(.admin-lesson-badge),
+html.light .bg-blue-600:not([class*="/"]),
+html.light .bg-emerald-600:not([class*="/"]) {
+  color: #ffffff !important;
+}
+
+html.light button.bg-indigo-600:not([class*="/"]) *,
+html.light button.bg-blue-600:not([class*="/"]) *,
+html.light button.bg-emerald-600:not([class*="/"]) *,
+html.light a.bg-indigo-600:not([class*="/"]) * {
+  color: #ffffff !important;
+}
+
+/* ========================================================================= */
+/* AdminView & CategoryManagement Light Mode Adaptations */
+/* ========================================================================= */
+
+/* Admin Lesson Number Badge (#1, #2) */
+html.light .admin-lesson-badge {
+  background-color: #e0e7ff !important;
+  border: 1px solid #c7d2fe !important;
+  color: #3730a3 !important;
+  font-weight: 700 !important;
+}
+
+/* Admin "去练习" Practice Link Button */
+html.light .admin-practice-btn {
+  background-color: #e0e7ff !important;
+  border: 1px solid #c7d2fe !important;
+  color: #3730a3 !important;
+  font-weight: 600 !important;
+}
+html.light .admin-practice-btn:hover {
+  background-color: #c7d2fe !important;
+  border-color: #a5b4fc !important;
+  color: #1e1b4b !important;
+}
+html.light .admin-practice-btn * {
+  color: #3730a3 !important;
+}
+html.light .admin-practice-btn:hover * {
+  color: #1e1b4b !important;
+}
+
+/* Category Management - Table Rows Hover */
+html.light .category-table-row:hover,
+html.light tr.hover\:bg-\[\#1a1f33\]:hover,
+html.light .hover\:bg-\[\#1a1f33\]:hover {
+  background-color: #f8fafc !important;
+}
+
+/* Category Management - Key Tags (intro, elementary, grade=1, etc.) */
+html.light .category-key-pill,
+html.light .bg-\[\#0f1320\],
+html.light .bg-\[\#0f1320\]\/80 {
+  background-color: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #334155 !important;
+  font-weight: 600 !important;
+}
+
+/* Category Management - Action Buttons (Edit & Delete) */
+html.light .category-action-btn,
+html.light .bg-\[\#1f263c\] {
+  background-color: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #4338ca !important;
+}
+html.light .category-action-btn:hover,
+html.light .hover\:bg-\[\#28324e\]:hover,
+html.light .bg-\[\#1f263c\]:hover {
+  background-color: #e0e7ff !important;
+  border-color: #c7d2fe !important;
+  color: #3730a3 !important;
+}
+html.light .category-action-btn * {
+  color: #4338ca !important;
+}
+html.light .category-action-btn:hover * {
+  color: #3730a3 !important;
+}
+
+/* Category Management - Delete Action Button Hover */
+html.light .category-action-btn-del:hover,
+html.light .hover\:bg-rose-950\/60:hover {
+  background-color: #ffe4e6 !important;
+  border-color: #fecdd3 !important;
+  color: #e11d48 !important;
+}
+html.light .category-action-btn-del:hover * {
+  color: #e11d48 !important;
+}
+
+/* Category Management - School Level Cards (Left Column) */
+html.light .school-level-card {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+}
+html.light .school-level-card:hover {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+html.light .school-level-card.school-level-card-active,
+html.light .school-level-card-active {
+  background-color: #eef2ff !important;
+  border: 1px solid #6366f1 !important;
+  box-shadow: 0 4px 12px -2px rgba(99, 102, 241, 0.18) !important;
+}
+
+/* Category Management - Inactive Subtab Nav Buttons */
+html.light .category-subtab-btn.is-inactive {
+  background-color: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #64748b !important;
+}
+html.light .category-subtab-btn.is-inactive:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* ========================================================================= */
+/* User Management (用户管理与学情中心) - Light Mode Overrides               */
+/* ========================================================================= */
+html.light .user-stat-card,
+html.light .user-filter-bar,
+html.light .user-table-card,
+html.light .user-detail-modal,
+html.light .user-sub-stat-card,
+html.light .user-sub-profile-grid,
+html.light .user-prog-card,
+html.light .user-fav-course-card,
+html.light .user-fav-sentence-card,
+html.light .user-review-card {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+}
+
+html.light .user-table-thead,
+html.light .user-detail-header,
+html.light .user-detail-tabs {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.light .user-detail-title {
+  color: #0f172a !important;
+}
+
+html.light .user-search-input {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+html.light .user-search-input::placeholder {
+  color: #94a3b8 !important;
+}
+
+html.light .user-query-btn {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+html.light .user-query-btn:hover {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html.light .user-table-tbody > tr {
+  border-color: #e2e8f0 !important;
+}
+
+html.light .user-table-row:hover {
+  background-color: #f8fafc !important;
+}
+
+html.light .user-table-row .user-name-title {
+  color: #0f172a !important;
+}
+
+html.light .user-detail-content {
+  background-color: #f8fafc !important;
+}
+
+/* Enforce no wrapping in User Management data table */
+.user-table-card table,
+.user-table-card th,
+.user-table-card td {
+  white-space: nowrap !important;
+}
+
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2b3247;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3f4966;
+}
+
+/* Keyboard shake animation on error */
+@keyframes shake-error {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.animate-shake {
+  animation: shake-error 0.3s ease-in-out;
+}
+
+/* Smooth transitions */
+.transition-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========================================================================= */
+/* Custom Select Component Styling (Coordinated Dark / Light Modes)          */
+/* ========================================================================= */
+.custom-select-trigger {
+  background-color: #0e121f;
+  border: 1px solid #252b41;
+  color: #f1f5f9;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+.custom-select-trigger:hover:not(:disabled) {
+  border-color: #4f46e5;
+  background-color: #141828;
+}
+.custom-select-menu {
+  background-color: #121626;
+  border-color: #252b41;
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.6), 0 8px 12px -6px rgba(0, 0, 0, 0.4);
+}
+.custom-select-option {
+  color: #cbd5e1;
+}
+.custom-select-option:hover:not(.opacity-40) {
+  background-color: rgba(99, 102, 241, 0.18);
+  color: #ffffff;
+}
+.custom-select-option.is-selected {
+  background-color: rgba(99, 102, 241, 0.25);
+  color: #818cf8;
+}
+
+/* Light Mode Overrides for CustomSelect */
+html.light .custom-select-trigger {
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+}
+html.light .custom-select-trigger:hover:not(:disabled) {
+  border-color: #6366f1 !important;
+  background-color: #f8fafc !important;
+}
+html.light .custom-select-trigger:focus,
+html.light .custom-select-trigger.ring-2 {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+}
+html.light .custom-select-menu {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.14), 0 6px 12px -4px rgba(15, 23, 42, 0.08) !important;
+}
+html.light .custom-select-option {
+  color: #334155 !important;
+}
+html.light .custom-select-option:hover:not(.opacity-40) {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+html.light .custom-select-option.is-selected {
+  background-color: #eef2ff !important;
+  color: #4338ca !important;
+}
+
+/* ========================================================================= */
+/* Global Native Select Fallback Styling                                     */
+/* ========================================================================= */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem 1rem;
+  padding-right: 2.25rem !important;
+  cursor: pointer;
+}
+html.light select {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+}
+html.light select:focus {
+  border-color: #6366f1 !important;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+select option {
+  background-color: #12151f;
+  color: #f1f5f9;
+}
+html.light select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* ========================================================================= */
+/* Header Daily Check-in Button Styling                                      */
+/* ========================================================================= */
+html.light .header-checkin-pending {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #64748b !important;
+}
+html.light .header-checkin-pending:hover {
+  background-color: #f1f5f9 !important;
+  color: #d97706 !important;
+  border-color: #fcd34d !important;
+}
+html.light .header-checkin-active {
+  background-color: #fffbeb !important;
+  border-color: #fde68a !important;
+  color: #d97706 !important;
+}
+html.light .header-checkin-toast {
+  background-color: #1e1b4b !important;
+  color: #e0e7ff !important;
+}
+
+/* ========================================================================= */
+/* User Management Modals (Detail, Edit, Create) Light Mode Adaptation       */
+/* ========================================================================= */
+html.light .user-form-modal-card {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+html.light .user-form-modal-header {
+  border-bottom-color: #e2e8f0 !important;
+}
+
+html.light .user-form-modal-title {
+  color: #0f172a !important;
+}
+
+html.light .user-form-modal-close {
+  color: #64748b !important;
+}
+html.light .user-form-modal-close:hover {
+  color: #0f172a !important;
+}
+
+html.light .user-form-modal-label {
+  color: #334155 !important;
+  font-weight: 500 !important;
+}
+
+html.light .user-form-modal-input {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+html.light .user-form-modal-input:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15) !important;
+}
+
+html.light .user-form-modal-disabled {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+  color: #64748b !important;
+}
+
+html.light .user-form-modal-footer {
+  border-top-color: #e2e8f0 !important;
+}
+
+html.light .user-form-modal-cancel {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+html.light .user-form-modal-cancel:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* User Detail (学情档案) Modal in Light Mode */
+html.light .user-detail-modal {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+html.light .user-detail-header {
+  background-color: #f8fafc !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+html.light .user-detail-title {
+  color: #0f172a !important;
+}
+
+html.light .user-detail-close-btn {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #64748b !important;
+}
+html.light .user-detail-close-btn:hover {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html.light .user-detail-tabs {
+  background-color: #f1f5f9 !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+html.light .user-detail-content {
+  background-color: #ffffff !important;
+}
+
+html.light .user-sub-stat-card {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.light .user-sub-profile-grid {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+html.light .user-sub-profile-grid h3 {
+  color: #0f172a !important;
+}
+html.light .user-sub-profile-grid .text-white,
+html.light .user-sub-profile-grid .text-slate-200,
+html.light .user-sub-profile-grid .text-slate-300 {
+  color: #1e293b !important;
+}
+
+html.light .user-prog-card,
+html.light .user-fav-course-card,
+html.light .user-fav-sentence-card,
+html.light .user-review-card {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.light .user-prog-card h4,
+html.light .user-fav-course-card h5,
+html.light .user-fav-sentence-card .text-white,
+html.light .user-review-card .text-white {
+  color: #0f172a !important;
+}
+
+html.light .user-fav-sentence-card .text-slate-300,
+html.light .user-review-card .text-slate-300 {
+  color: #334155 !important;
+}
+
+

@@ -1,0 +1,14 @@
+logs
+*.log
+node_modules
+dist
+dist-server
+dist-ssr
+release
+data/*.db*
+.env
+.env.*
+!.env.example
+*.yxdpack
+*.local
+.DS_Store
