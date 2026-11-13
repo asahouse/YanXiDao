@@ -80,9 +80,17 @@ export function generateResetToken(): string {
   return crypto.randomBytes(24).toString('hex')
 }
 
+export type ClientType = 'web' | 'desktop'
+
+export function normalizeClientType(raw?: unknown): ClientType {
+  return raw === 'desktop' ? 'desktop' : 'web'
+}
+
 export interface TokenPayload {
   sub: string
   scope: 'user' | 'admin'
+  clientType?: ClientType
+  sid?: string
   username?: string
   exp: number
 }
@@ -113,9 +121,20 @@ function verifyToken(token: string, expectedScope: 'user' | 'admin', secret: str
   }
 }
 
-export function signUserToken(userId: string, ttlDays = 30): string {
+export function signUserToken(
+  userId: string,
+  clientType: ClientType = 'web',
+  sid?: string,
+  ttlDays = 30
+): string {
   return signPayload(
-    { sub: userId, scope: 'user', exp: Date.now() + ttlDays * 24 * 60 * 60 * 1000 },
+    {
+      sub: userId,
+      scope: 'user',
+      clientType,
+      sid: sid || crypto.randomBytes(16).toString('hex'),
+      exp: Date.now() + ttlDays * 24 * 60 * 60 * 1000,
+    },
     USER_TOKEN_SECRET
   )
 }

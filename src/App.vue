@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import AppSidebar from './components/layout/AppSidebar.vue'
 import AppHeader from './components/layout/AppHeader.vue'
 import UserCenterModal from './components/modals/UserCenterModal.vue'
@@ -12,6 +12,7 @@ import { useMenuStore } from './stores/menuStore'
 import { KeyRound, Lock, Sparkles } from 'lucide-vue-next'
 
 const route = useRoute()
+const router = useRouter()
 const settingsStore = useSettingsStore()
 const courseStore = useCourseStore()
 const userStore = useUserStore()
@@ -59,7 +60,38 @@ watch(
   }
 )
 
+let syncTimer: ReturnType<typeof setInterval> | null = null
+
+function onSessionKicked(e: Event) {
+  const detail = (e as CustomEvent<string>).detail || '您的账号已在另一台同类型设备登录，当前会话已下线'
+  userStore.handleSessionKicked(detail)
+  if (route.path !== '/login') {
+    router.push('/login')
+  }
+}
+
+function onVisibilityChange() {
+  if (document.visibilityState === 'visible' && userStore.isAuthenticated) {
+    userStore.syncFromCloud()
+  }
+}
+
+function onNetworkOnline() {
+  if (userStore.isAuthenticated) {
+    userStore.flushOfflineOutbox()
+  }
+}
+
 onMounted(async () => {
+  window.addEventListener('yxd:session-kicked', onSessionKicked)
+  document.addEventListener('visibilitychange', onVisibilityChange)
+  window.addEventListener('online', onNetworkOnline)
+  syncTimer = setInterval(() => {
+    if (userStore.isAuthenticated) {
+      userStore.syncFromCloud()
+    }
+  }, 30000)
+
   await Promise.allSettled([
     settingsStore.fetchSettings(),
     menuStore.fetchMenu(),
@@ -68,7 +100,17 @@ onMounted(async () => {
     userStore.fetchPurchases(),
     reviewStore.fetchReviews(),
   ])
+  if (userStore.isAuthenticated) {
+    userStore.flushOfflineOutbox()
+  }
   settingsStore.applyCSSVariables()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('yxd:session-kicked', onSessionKicked)
+  document.removeEventListener('visibilitychange', onVisibilityChange)
+  window.removeEventListener('online', onNetworkOnline)
+  if (syncTimer) clearInterval(syncTimer)
 })
 </script>
 

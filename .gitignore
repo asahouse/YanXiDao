@@ -5,7 +5,7 @@ dist
 dist-server
 dist-ssr
 release
-data/*.db*
+data/
 .env
 .env.*
 !.env.example

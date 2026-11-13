@@ -35,6 +35,8 @@ import {
   verifyUserToken,
   signAdminToken,
   verifyAdminToken,
+  normalizeClientType,
+  type ClientType,
 } from './authUtils'
 import { getSmtpConfig, saveSmtpConfig, sendAccountProvisionEmail, sendSystemEmail } from './emailService'
 import {
@@ -92,22 +94,76 @@ app.get('/api/health', async (_, res) => {
 })
 
 // ==================== Auth & Progression Helpers ====================
-function getAuthenticatedUserId(req: express.Request): string | null {
+function getAuthenticatedUserPayload(req: express.Request) {
   const authHeader = req.headers.authorization || ''
   if (authHeader.startsWith('Bearer ')) {
     const token = authHeader.slice(7).trim()
     const payload = verifyUserToken(token)
-    if (payload?.sub) return payload.sub
+    if (payload?.sub) return payload
   }
   return null
 }
 
-function requireUser(req: express.Request, res: express.Response, next: express.NextFunction) {
-  const userId = getAuthenticatedUserId(req)
-  if (!userId) {
+function getAuthenticatedUserId(req: express.Request): string | null {
+  return getAuthenticatedUserPayload(req)?.sub || null
+}
+
+async function issueUserSessionToken(userId: string, clientType: ClientType, deviceInfo = ''): Promise<string> {
+  const sid = crypto.randomBytes(16).toString('hex')
+  const slotId = `${userId}:${clientType}`
+  const nowStr = formatLocalDateTime(new Date())
+  await pool.query(
+    `INSERT INTO user_sessions (id, user_id, client_type, session_id, device_info, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?)
+     ON DUPLICATE KEY UPDATE session_id = VALUES(session_id), device_info = VALUES(device_info), updated_at = VALUES(updated_at);`,
+    [slotId, userId, clientType, sid, deviceInfo.slice(0, 160), nowStr]
+  )
+  return signUserToken(userId, clientType, sid)
+}
+
+async function recordIdempotentSyncEvent(eventId: string, userId: string, clientType: string): Promise<boolean> {
+  const cleanId = String(eventId || '').trim().slice(0, 128)
+  if (!cleanId) return true
+  try {
+    const [existing] = await pool.query<any[]>('SELECT id FROM sync_events WHERE id = ? LIMIT 1;', [cleanId])
+    if (existing.length > 0) return false
+    await pool.query(
+      'INSERT INTO sync_events (id, user_id, client_type) VALUES (?, ?, ?);',
+      [cleanId, userId, clientType || 'web']
+    )
+    return true
+  } catch {
+    return false
+  }
+}
+
+async function requireUser(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const payload = getAuthenticatedUserPayload(req)
+  if (!payload?.sub) {
     return res.status(401).json({ error: '请先登录账号后再执行此操作' })
   }
-  ;(req as any).userId = userId
+  if (payload.sid && payload.clientType) {
+    try {
+      const slotId = `${payload.sub}:${payload.clientType}`
+      const [rows] = await pool.query<any[]>('SELECT session_id FROM user_sessions WHERE id = ? LIMIT 1;', [slotId])
+      if (rows.length === 0) {
+        return res.status(401).json({ error: '登录会话已失效，请重新登录', code: 'SESSION_EXPIRED' })
+      }
+      if (rows[0].session_id !== payload.sid) {
+        const label = payload.clientType === 'desktop' ? '桌面端' : '网页端'
+        return res.status(401).json({
+          error: `您的账号已在另一台${label}登录，当前会话已下线`,
+          code: 'SESSION_KICKED',
+          clientType: payload.clientType,
+        })
+      }
+    } catch (err: unknown) {
+      return res.status(500).json({ error: (err as Error).message })
+    }
+  }
+  ;(req as any).userId = payload.sub
+  ;(req as any).clientType = payload.clientType || 'web'
+  ;(req as any).sessionId = payload.sid || ''
   next()
 }
 
@@ -262,11 +318,13 @@ app.post('/api/auth/login', authRateLimiter, async (req, res) => {
       return res.status(401).json({ error: '邮箱或密码错误' })
     }
 
+    const clientType = normalizeClientType(req.body?.clientType || req.headers['x-client-type'])
     const formatted = await syncAndFormatUserProfile(user)
-    const token = signUserToken(user.id)
+    const token = await issueUserSessionToken(user.id, clientType, String(req.headers['user-agent'] || ''))
     res.json({
       success: true,
       token,
+      clientType,
       mustChangePassword: Boolean(user.must_change_password),
       user: formatted,
     })
@@ -275,7 +333,7 @@ app.post('/api/auth/login', authRateLimiter, async (req, res) => {
   }
 })
 
-app.post('/api/auth/demo-login', async (_, res) => {
+app.post('/api/auth/demo-login', async (req, res) => {
   try {
     const [rows] = await pool.query<any[]>("SELECT * FROM user_profile WHERE id = '8723192' LIMIT 1;")
     if (rows.length === 0) return res.status(404).json({ error: '默认体验账号不存在' })
@@ -283,9 +341,27 @@ app.post('/api/auth/demo-login', async (_, res) => {
     if (user.status === 'disabled') {
       return res.status(403).json({ error: '该账号已被管理员停用' })
     }
+    const clientType = normalizeClientType(req.body?.clientType || req.headers['x-client-type'])
     const formatted = await syncAndFormatUserProfile(user)
-    const token = signUserToken(user.id)
-    res.json({ success: true, token, user: formatted })
+    const token = await issueUserSessionToken(user.id, clientType, String(req.headers['user-agent'] || ''))
+    res.json({ success: true, token, clientType, user: formatted })
+  } catch (err: unknown) {
+    res.status(500).json({ error: (err as Error).message })
+  }
+})
+
+app.post('/api/auth/logout', requireUser, async (req, res) => {
+  try {
+    const userId = (req as any).userId as string
+    const clientType = normalizeClientType((req as any).clientType)
+    const sid = String((req as any).sessionId || '')
+    const slotId = `${userId}:${clientType}`
+    if (sid) {
+      await pool.query('DELETE FROM user_sessions WHERE id = ? AND session_id = ?;', [slotId, sid])
+    } else {
+      await pool.query('DELETE FROM user_sessions WHERE id = ?;', [slotId])
+    }
+    res.json({ success: true })
   } catch (err: unknown) {
     res.status(500).json({ error: (err as Error).message })
   }
@@ -362,10 +438,11 @@ app.post('/api/auth/reset-by-token', authRateLimiter, async (req, res) => {
       'UPDATE user_profile SET password_hash = ?, must_change_password = 0, reset_token = NULL, reset_token_expires = NULL WHERE id = ?;',
       [hashPassword(String(newPassword)), user.id]
     )
+    const clientType = normalizeClientType(req.body?.clientType || req.headers['x-client-type'])
     const [updatedRows] = await pool.query<any[]>('SELECT * FROM user_profile WHERE id = ? LIMIT 1;', [user.id])
     const formatted = await syncAndFormatUserProfile(updatedRows[0])
-    const authToken = signUserToken(user.id)
-    res.json({ success: true, token: authToken, user: formatted, message: '密码设置成功，已自动登录' })
+    const authToken = await issueUserSessionToken(user.id, clientType, String(req.headers['user-agent'] || ''))
+    res.json({ success: true, token: authToken, clientType, user: formatted, message: '密码设置成功，已自动登录' })
   } catch (err: unknown) {
     res.status(500).json({ error: (err as Error).message })
   }
@@ -503,14 +580,29 @@ app.post('/api/user/checkin', requireUser, async (req, res) => {
 
 app.put('/api/user/profile', requireUser, async (req, res) => {
   try {
-    const { nickname, avatar, addStudySeconds, addSentenceCount } = req.body
+    const { nickname, avatar, addStudySeconds, addSentenceCount, eventId } = req.body
     const targetUserId = (req as any).userId as string
+    const clientType = String((req as any).clientType || 'web')
     const [rows] = await pool.query<any[]>('SELECT * FROM user_profile WHERE id = ? LIMIT 1;', [targetUserId])
     if (rows.length === 0) return res.status(404).json({ error: 'User not found' })
     const user = rows[0]
 
     // Ensure daily quota / VIP expiration is synced first
     const synced = await syncAndFormatUserProfile(user)
+
+    if (eventId) {
+      const isFresh = await recordIdempotentSyncEvent(String(eventId), targetUserId, clientType)
+      if (!isFresh) {
+        return res.json({
+          success: true,
+          deduplicated: true,
+          expGained: 0,
+          leveledUp: false,
+          newLevel: synced.level,
+          profile: synced,
+        })
+      }
+    }
 
     const updates: string[] = []
     const values: any[] = []
@@ -583,6 +675,114 @@ app.put('/api/user/profile', requireUser, async (req, res) => {
       leveledUp,
       newLevel,
       profile: updatedProfile,
+    })
+  } catch (err: unknown) {
+    res.status(500).json({ error: (err as Error).message })
+  }
+})
+
+// ==================== Multi-Client Incremental State Sync ====================
+app.get('/api/user/sync', requireUser, async (req, res) => {
+  try {
+    const userId = (req as any).userId as string
+    const [uRows] = await pool.query<any[]>('SELECT * FROM user_profile WHERE id = ? LIMIT 1;', [userId])
+    if (uRows.length === 0) return res.status(404).json({ error: 'User not found' })
+    const profile = await syncAndFormatUserProfile(uRows[0])
+
+    const [progressRows] = await pool.query<any[]>(
+      'SELECT * FROM user_course_progress WHERE user_id = ? ORDER BY last_practiced_at DESC;',
+      [userId]
+    )
+    const [favRows] = await pool.query<any[]>(
+      'SELECT course_id FROM user_favorites WHERE user_id = ?;',
+      [userId]
+    )
+
+    res.json({
+      serverTime: formatLocalDateTime(new Date()),
+      profile,
+      progressList: progressRows.map(r => ({
+        courseId: r.course_id,
+        lessonId: r.lesson_id,
+        sentenceIndex: Number(r.sentence_index || 0),
+        totalSentences: Number(r.total_sentences || 0),
+        progressPercent: Number(r.progress_percent || 0),
+        studySeconds: Number(r.study_seconds || 0),
+        lastPracticedAt: r.last_practiced_at,
+      })),
+      favoriteCourseIds: favRows.map(r => r.course_id),
+    })
+  } catch (err: unknown) {
+    res.status(500).json({ error: (err as Error).message })
+  }
+})
+
+app.post('/api/user/sync', requireUser, async (req, res) => {
+  try {
+    const userId = (req as any).userId as string
+    const clientType = String((req as any).clientType || 'web')
+    const events = Array.isArray(req.body?.events) ? req.body.events.slice(0, 100) : []
+    let appliedCount = 0
+    let deduplicatedCount = 0
+
+    for (const ev of events) {
+      const eventId = String(ev?.eventId || '').trim()
+      if (!eventId) continue
+      const isFresh = await recordIdempotentSyncEvent(eventId, userId, clientType)
+      if (!isFresh) {
+        deduplicatedCount++
+        continue
+      }
+
+      const [uRows] = await pool.query<any[]>('SELECT * FROM user_profile WHERE id = ? LIMIT 1;', [userId])
+      if (uRows.length === 0) break
+      const synced = await syncAndFormatUserProfile(uRows[0])
+
+      const secs = ev.addStudySeconds && Number(ev.addStudySeconds) > 0 ? Math.min(300, Math.floor(Number(ev.addStudySeconds))) : 0
+      const cnt = ev.addSentenceCount && Number(ev.addSentenceCount) > 0 ? Math.min(20, Math.floor(Number(ev.addSentenceCount))) : 0
+      if (secs > 0 || cnt > 0) {
+        let rawExp = 0
+        const updates: string[] = []
+        const vals: any[] = []
+        if (secs > 0) {
+          updates.push('total_study_seconds = total_study_seconds + ?', 'today_study_seconds = today_study_seconds + ?', 'month_study_seconds = month_study_seconds + ?')
+          vals.push(secs, secs, secs)
+          if (!synced.isVipActive) {
+            updates.push('today_used_seconds = today_used_seconds + ?')
+            vals.push(secs)
+          }
+          rawExp += Math.floor((synced.totalStudySeconds + secs) / 6) - Math.floor(synced.totalStudySeconds / 6)
+        }
+        if (cnt > 0) {
+          updates.push('total_sentence_count = total_sentence_count + ?', 'today_sentence_count = today_sentence_count + ?')
+          vals.push(cnt, cnt)
+          rawExp += cnt * 2
+        }
+        if (rawExp > 0) {
+          const multiplied = synced.isVipActive ? Math.round(rawExp * VIP_EXP_MULTIPLIER) : rawExp
+          const gain = Math.min(multiplied, Math.max(0, DAILY_EXP_CAP - (synced.todayExp || 0)))
+          if (gain > 0) {
+            const nextLevel = getLevelInfo(synced.exp + gain).level
+            updates.push('exp = exp + ?', 'today_exp = today_exp + ?', 'level = ?')
+            vals.push(gain, gain, nextLevel)
+          }
+        }
+        if (updates.length > 0) {
+          vals.push(userId)
+          await pool.query(`UPDATE user_profile SET ${updates.join(', ')} WHERE id = ?;`, vals)
+        }
+      }
+      appliedCount++
+    }
+
+    const [afterRows] = await pool.query<any[]>('SELECT * FROM user_profile WHERE id = ? LIMIT 1;', [userId])
+    const profile = afterRows.length > 0 ? await syncAndFormatUserProfile(afterRows[0]) : null
+    res.json({
+      success: true,
+      serverTime: formatLocalDateTime(new Date()),
+      appliedCount,
+      deduplicatedCount,
+      profile,
     })
   } catch (err: unknown) {
     res.status(500).json({ error: (err as Error).message })

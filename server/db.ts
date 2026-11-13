@@ -778,6 +778,30 @@ export async function initDatabase() {
       CREATE INDEX IF NOT EXISTS idx_vip_msg_req ON vip_upgrade_messages (request_id);
     `)
 
+    // 1c. Per-client-type single-slot active sessions (1 web + 1 desktop allowed concurrently)
+    await execDdl(`
+      CREATE TABLE IF NOT EXISTS user_sessions (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        client_type TEXT NOT NULL,
+        session_id TEXT NOT NULL,
+        device_info TEXT DEFAULT '',
+        updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+      );
+      CREATE INDEX IF NOT EXISTS idx_user_sessions_uid ON user_sessions (user_id);
+    `)
+
+    // 1d. Idempotent sync events table (prevents duplicate EXP/duration counting on retries or outbox replay)
+    await execDdl(`
+      CREATE TABLE IF NOT EXISTS sync_events (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        client_type TEXT NOT NULL,
+        created_at TEXT DEFAULT (datetime('now', 'localtime'))
+      );
+      CREATE INDEX IF NOT EXISTS idx_sync_events_uid ON sync_events (user_id);
+    `)
+
     // 2. Purchase records
     await execDdl(`
       CREATE TABLE IF NOT EXISTS purchase_records (

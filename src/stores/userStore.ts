@@ -1,8 +1,14 @@
 import { defineStore } from 'pinia'
 import type { UserProfile, PurchaseRecord } from '../types'
 import { getLevelInfo, isVipActive, getVipRemainingDays } from '../utils/levelRules'
+import { getClientType, userFetch } from '../utils/userApi'
 
 const USER_TOKEN_KEY = 'yxd_user_token'
+const SYNC_OUTBOX_KEY = 'yxd_sync_outbox'
+
+function makeEventId(): string {
+  return `ev_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
+}
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -65,7 +71,10 @@ export const useUserStore = defineStore('user', {
   },
   actions: {
     getAuthHeaders(): Record<string, string> {
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'X-Client-Type': getClientType(),
+      }
       if (this.token) {
         headers['Authorization'] = `Bearer ${this.token}`
       }
@@ -83,32 +92,88 @@ export const useUserStore = defineStore('user', {
     },
 
     logout() {
+      if (this.token) {
+        userFetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
+      }
       this.token = ''
       localStorage.removeItem(USER_TOKEN_KEY)
       this.showForceChangePwdModal = false
+    },
+
+    handleSessionKicked(reason: string) {
+      this.token = ''
+      localStorage.removeItem(USER_TOKEN_KEY)
+      this.showForceChangePwdModal = false
+      this.disabledNotice = reason || '您的账号已在另一台同类型设备登录，当前会话已下线'
+    },
+
+    enqueueOfflineEvent(ev: { eventId: string; addStudySeconds?: number; addSentenceCount?: number }) {
+      try {
+        const raw = localStorage.getItem(SYNC_OUTBOX_KEY)
+        const list = raw ? JSON.parse(raw) : []
+        list.push(ev)
+        localStorage.setItem(SYNC_OUTBOX_KEY, JSON.stringify(list.slice(-100)))
+      } catch {}
+    },
+
+    async flushOfflineOutbox() {
+      if (!this.token) return
+      try {
+        const raw = localStorage.getItem(SYNC_OUTBOX_KEY)
+        const list = raw ? JSON.parse(raw) : []
+        if (!Array.isArray(list) || list.length === 0) return
+        const res = await userFetch('/api/user/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ events: list }),
+        })
+        if (res.ok) {
+          localStorage.removeItem(SYNC_OUTBOX_KEY)
+          const data = await res.json()
+          if (data.profile) this.profile = data.profile
+        }
+      } catch {}
+    },
+
+    async syncFromCloud() {
+      if (!this.token) return
+      await this.flushOfflineOutbox()
+      try {
+        const res = await userFetch('/api/user/sync')
+        if (res.ok) {
+          const data = await res.json()
+          if (data.profile) this.profile = data.profile
+        }
+      } catch {}
     },
 
     async login(email: string, password: string) {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, clientType: getClientType() }),
       })
       const data = await res.json()
       if (!res.ok) {
         throw new Error(data.error || '登录失败')
       }
       this.setSession(data.token, data.user, data.mustChangePassword)
+      await this.flushOfflineOutbox()
       return data
     },
 
     async demoLogin() {
-      const res = await fetch('/api/auth/demo-login', { method: 'POST' })
+      const res = await fetch('/api/auth/demo-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientType: getClientType() }),
+      })
       const data = await res.json()
       if (!res.ok) {
         throw new Error(data.error || '体验登录失败')
       }
       this.setSession(data.token, data.user, false)
+      await this.flushOfflineOutbox()
       return data
     },
 
@@ -131,7 +196,7 @@ export const useUserStore = defineStore('user', {
       const res = await fetch('/api/auth/reset-by-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, newPassword }),
+        body: JSON.stringify({ token, newPassword, clientType: getClientType() }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -207,11 +272,12 @@ export const useUserStore = defineStore('user', {
     async recordSentenceCompleted() {
       this.profile.totalSentenceCount += 1
       this.profile.todaySentenceCount += 1
+      const eventId = makeEventId()
       try {
-        const res = await fetch('/api/user/profile', {
+        const res = await userFetch('/api/user/profile', {
           method: 'PUT',
-          headers: this.getAuthHeaders(),
-          body: JSON.stringify({ userId: this.profile.id || '8723192', addSentenceCount: 1 }),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: this.profile.id || '8723192', addSentenceCount: 1, eventId }),
         })
         if (res.ok) {
           const data = await res.json()
@@ -222,8 +288,11 @@ export const useUserStore = defineStore('user', {
             const info = getLevelInfo(this.profile.exp)
             this.levelUpToast = `🎉 恭喜升级至 Lv.${info.level}「${info.title}」！每日免费时长已延长至 ${info.dailyQuotaMinutes} 分钟`
           }
+        } else if (res.status >= 500) {
+          this.enqueueOfflineEvent({ eventId, addSentenceCount: 1 })
         }
       } catch (err) {
+        this.enqueueOfflineEvent({ eventId, addSentenceCount: 1 })
         console.error('Failed to update sentence count:', err)
       }
     },
